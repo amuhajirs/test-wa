@@ -1,11 +1,10 @@
 import { findByEmail } from "../user/userRepo.js"
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import User from "../../model/User.js";
 import generateOTP from "../../helpers/otp.js";
 
 export const loginService = async (email, password) => {
-    const user = await findByEmail(email)
+    const user = await findByEmail(email, true)
 
     if(!user){
         throw new Error('Bad Credential');
@@ -31,7 +30,7 @@ export const loginService = async (email, password) => {
 export const verifyToken = async (token) => {
     try {
         const decoded = jwt.verify(token, process.env.JWT_KEY);
-        const user = await User.findOne({email: decoded.email}).select('-password');
+        const user = await findByEmail(decoded.email, false)
         return user
     } catch {
         throw new Error('Unauthorized')
